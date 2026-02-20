@@ -46,6 +46,48 @@ func (e *Event) Save() error {
 	return nil
 }
 
+func (e *Event) Update(id int64) error {
+	tx, err := db.DB.Begin()
+	if err != nil {
+		return errors.New("Could not update event, " + err.Error())
+	}
+
+	_, err = GetEventById(id)
+	if err != nil {
+		return errors.New("Could not update event, " + err.Error())
+	}
+
+	query := `
+	UPDATE event
+	SET
+		name=?, 
+		description=?, 
+		location=?, 
+		dateTime=?, 
+		userId=?
+	WHERE 
+		id = ?
+	`
+	statement, err := db.DB.Prepare(query)
+	if err != nil {
+		return errors.New("Could not update event, " + err.Error())
+	}
+
+	_, err = statement.Exec(e.Name, e.Description, e.Location, e.DateTime, e.UserID, id)
+	if err != nil {
+		return errors.New("Could not update event, " + err.Error())
+	}
+	defer statement.Close()
+
+	err = tx.Commit()
+	if err != nil {
+		return errors.New("Could not update event, " + err.Error())
+	}
+	e.ID = id
+
+	return nil
+}
+
 func GetAllEvents() ([]Event, error) {
 	query := `
 	SELECT id, name, description, location, dateTime, userId

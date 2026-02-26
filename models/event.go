@@ -16,8 +16,6 @@ type Event struct {
 	UserID      int
 }
 
-var events = []Event{}
-
 func (e *Event) Save() error {
 	query := `
 	INSERT INTO event
@@ -140,4 +138,38 @@ func GetEventById(id int64) (*Event, error) {
 	}
 
 	return &event, nil
+}
+
+func DeleteEventById(id int64) error {
+	tx, err := db.DB.Begin()
+	if err != nil {
+		return errors.New("Could not delete event, " + err.Error())
+	}
+
+	_, err = GetEventById(id)
+	if err != nil {
+		return errors.New("Could not update event, " + err.Error())
+	}
+
+	query := `
+	DELETE FROM event
+	WHERE id = ?
+	`
+	statement, err := db.DB.Prepare(query)
+	if err != nil {
+		return errors.New("Could not delete event, " + err.Error())
+	}
+
+	_, err = statement.Exec(id)
+	if err != nil {
+		return errors.New("Could not delete event, " + err.Error())
+	}
+	defer statement.Close()
+
+	err = tx.Commit()
+	if err != nil {
+		return errors.New("Could not delete event, " + err.Error())
+	}
+
+	return nil
 }

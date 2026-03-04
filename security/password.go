@@ -11,7 +11,7 @@ func GenerateSalt() string {
 }
 
 func HashPassword(password, salt string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password+salt), 14)
 	if err != nil {
 		return "", err
 	}
@@ -19,7 +19,7 @@ func HashPassword(password, salt string) (string, error) {
 	return string(bytes), nil
 }
 
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+func CheckPasswordHash(password, hash, salt string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password+salt))
 	return err == nil
 }

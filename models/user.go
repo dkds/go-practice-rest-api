@@ -13,8 +13,14 @@ type User struct {
 	Password string `binding:"required"`
 }
 
-func (user *User) Save() error {
+type userData struct {
+	id           int64
+	email        string
+	passwordHash string
+	passwordSalt string
+}
 
+func (user *User) Save() error {
 	passwordSalt := security.GenerateSalt()
 	passwordHash, err := security.HashPassword(user.Password, passwordSalt)
 	if err != nil {
@@ -45,5 +51,30 @@ func (user *User) Save() error {
 
 	user.ID = id
 
+	return nil
+}
+
+func (user *User) ValidateCredentials() error {
+	query := `
+	SELECT id, email, password_hash, password_salt
+	FROM user
+	WHERE email = ?
+	`
+	row := db.DB.QueryRow(query, user.Email)
+	var userData userData
+	err := row.Scan(
+		&userData.id,
+		&userData.email,
+		&userData.passwordHash,
+		&userData.passwordSalt,
+	)
+	if err != nil {
+		return errors.New("Could not retrieve the user" + err.Error())
+	}
+
+	valid := security.CheckPasswordHash(user.Password, userData.passwordHash, userData.passwordSalt)
+	if !valid {
+		return errors.New("Could not validate the credentials")
+	}
 	return nil
 }

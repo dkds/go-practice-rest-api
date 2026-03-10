@@ -78,3 +78,21 @@ func (user *User) ValidateCredentials() error {
 	}
 	return nil
 }
+
+func GetUserIdByEmail(email string) (int64, error) {
+	query := `
+	SELECT id
+	FROM user
+	WHERE email = ?
+	`
+	row := db.DB.QueryRow(query, email)
+	var user User
+	err := row.Scan(
+		&user.ID,
+	)
+	if err != nil {
+		return 0, errors.New("Could not retrieve the user" + err.Error())
+	}
+
+	return user.ID, nil
+}

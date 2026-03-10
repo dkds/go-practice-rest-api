@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"dkds.com/rest-api/models"
+	"dkds.com/rest-api/security"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,8 +28,27 @@ func loginUser(context *gin.Context) {
 		return
 	}
 
+	userId, err := models.GetUserIdByEmail(user.Email)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to generate token",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	token, err := security.GenerateToken(user.Email, userId)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to generate token",
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Login success",
+		"token":   token,
 	})
 }
 

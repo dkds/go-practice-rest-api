@@ -1,10 +1,3 @@
-POST http://localhost:8080/events
+POST http://localhost:8080/events/1/register
 Content-Type: application/json
 Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QxQHRlc3QuY29tIiwiZXhwIjoxNzc1MDc2NTQ4LCJ1c2VySWQiOjF9.UYz8pie3ErowEjH5RFd1zoGY3O-HLcKHOUXpFg8WtIY
-
-{
-    "name": "Test event 1",
-    "description": "A test event 1",
-    "location": "A test location 1",
-    "dateTime": "2026-02-12T23:14:34.000Z"
-}

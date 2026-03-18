@@ -173,3 +173,24 @@ func DeleteEventById(id int64) error {
 
 	return nil
 }
+
+func (e *Event) RegisterUser(userId int64) error {
+	query := `
+	INSERT INTO registration
+	(event_id, user_id)
+	VALUES
+	(?, ?)
+	`
+	statement, err := db.DB.Prepare(query)
+	if err != nil {
+		return errors.New("Could not save registration, " + err.Error())
+	}
+
+	_, err = statement.Exec(e.ID, userId)
+	if err != nil {
+		return errors.New("Could not save registration, " + err.Error())
+	}
+	defer statement.Close()
+
+	return nil
+}

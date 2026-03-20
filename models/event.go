@@ -194,3 +194,23 @@ func (e *Event) RegisterUser(userId int64) error {
 
 	return nil
 }
+
+func (e *Event) CancelRegistration(userId int64) error {
+	query := `
+	DELETE FROM registration
+	WHERE
+	event_id = ? AND user_id = ?
+	`
+	statement, err := db.DB.Prepare(query)
+	if err != nil {
+		return errors.New("Could not cancel registration, " + err.Error())
+	}
+
+	_, err = statement.Exec(e.ID, userId)
+	if err != nil {
+		return errors.New("Could not cancel registration, " + err.Error())
+	}
+	defer statement.Close()
+
+	return nil
+}
